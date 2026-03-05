@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Persistent — Aurora AI on Hedera</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: #0a0a0f;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+      border-bottom: 1px solid #7c3aed40;
+      padding: 24px 32px;
+    }
+    .logo { font-size: 24px; font-weight: 700; color: #a78bfa; }
+    .tagline { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 32px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+    .card {
+      background: #12121e;
+      border: 1px solid #1e1e3a;
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .card-title { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+    .card-value { font-size: 36px; font-weight: 700; color: #a78bfa; }
+    .card-sub { font-size: 12px; color: #475569; margin-top: 4px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat {
+      background: #12121e;
+      border: 1px solid #1e1e3a;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-num { font-size: 28px; font-weight: 700; color: #7c3aed; }
+    .stat-label { font-size: 11px; color: #64748b; margin-top: 4px; }
+    .section-title { font-size: 14px; color: #94a3b8; margin-bottom: 16px; font-weight: 600; }
+    .table-container {
+      background: #12121e;
+      border: 1px solid #1e1e3a;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: #0f0f1a;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #1e1e3a;
+    }
+    td {
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #94a3b8;
+      border-bottom: 1px solid #0f0f1a;
+    }
+    tr:last-child td { border-bottom: none; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .badge-success { background: #064e3b; color: #6ee7b7; }
+    .badge-memory { background: #3b0764; color: #c4b5fd; }
+    .badge-payment { background: #78350f; color: #fcd34d; }
+    .badge-decision { background: #1e3a5f; color: #93c5fd; }
+    .hash { font-family: monospace; font-size: 11px; color: #6366f1; }
+    .tx-link { color: #a78bfa; text-decoration: none; }
+    .tx-link:hover { text-decoration: underline; }
+    .task-form {
+      background: #12121e;
+      border: 1px solid #7c3aed40;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .form-row { display: flex; gap: 12px; align-items: flex-end; }
+    .form-group { flex: 1; }
+    label { display: block; font-size: 11px; color: #64748b; margin-bottom: 6px; text-transform: uppercase; }
+    select, input, textarea {
+      width: 100%;
+      background: #0a0a0f;
+      border: 1px solid #1e1e3a;
+      border-radius: 6px;
+      padding: 10px 12px;
+      color: #e2e8f0;
+      font-family: inherit;
+      font-size: 13px;
+    }
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: #7c3aed;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    button {
+      background: #7c3aed;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button:hover { background: #6d28d9; }
+    button:disabled { background: #374151; cursor: not-allowed; }
+    .result-box {
+      background: #0a0a0f;
+      border: 1px solid #1e1e3a;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #94a3b8;
+      display: none;
+    }
+    .result-box.visible { display: block; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .dot-green { background: #10b981; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-red { background: #ef4444; }
+    .network-bar {
+      background: #0f0f1a;
+      border-bottom: 1px solid #1e1e3a;
+      padding: 8px 32px;
+      font-size: 11px;
+      color: #475569;
+      display: flex;
+      gap: 24px;
+    }
+    .loading { color: #475569; font-style: italic; }
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .form-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">⬡ Persistent</div>
+    <div class="tagline">Aurora AI Agent — Verifiable Memory Protocol on Hedera Consensus Service</div>
+  </header>
+
+  <div class="network-bar">
+    <span id="status-indicator">
+      <span class="status-dot dot-yellow"></span>Connecting...
+    </span>
+    <span id="network-info">Network: —</span>
+    <span id="topic-info">Memory Topic: —</span>
+    <span id="last-updated">Last updated: —</span>
+  </div>
+
+  <div class="container">
+
+    <!-- Stats -->
+    <div class="stat-grid">
+      <div class="stat">
+        <div class="stat-num" id="total-sessions">—</div>
+        <div class="stat-label">Sessions Committed</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="total-tasks">—</div>
+        <div class="stat-label">Tasks Logged</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="total-decisions">—</div>
+        <div class="stat-label">Decisions Recorded</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="total-payments">—</div>
+        <div class="stat-label">Payments Processed</div>
+      </div>
+    </div>
+
+    <!-- Submit Task -->
+    <div class="task-form">
+      <div class="section-title">Submit Task (HBAR-Gated)</div>
+      <div class="form-row">
+        <div class="form-group" style="max-width: 180px;">
+          <label>Task Type</label>
+          <select id="task-type">
+            <option value="analysis">Analysis</option>
+            <option value="research">Research</option>
+            <option value="code_review">Code Review</option>
+            <option value="summary">Summary</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Prompt</label>
+          <input type="text" id="task-prompt" placeholder="Enter your task prompt..." maxlength="2000">
+        </div>
+        <button id="submit-btn" onclick="submitTask()">Execute →</button>
+      </div>
+      <div class="result-box" id="task-result"></div>
+    </div>
+
+    <!-- Recent Memory Commits -->
+    <div class="section-title">Memory Commits (On-Chain)</div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Session ID</th>
+            <th>Memory Hash</th>
+            <th>Tasks</th>
+            <th>Timestamp</th>
+            <th>Verify</th>
+          </tr>
+        </thead>
+        <tbody id="commits-table">
+          <tr><td colspan="5" class="loading">Loading from Hedera Mirror Node...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Recent Tasks -->
+    <div class="section-title">Task Audit Log (HCS)</div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Task ID</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>HCS TX</th>
+          </tr>
+        </thead>
+        <tbody id="tasks-table">
+          <tr><td colspan="4" class="loading">Loading from Hedera Mirror Node...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="text-align: center; padding: 24px; color: #1e3a5f; font-size: 11px;">
+      All data is stored on Hedera Consensus Service — immutable, tamper-proof, permanently verifiable.
+      <br>
+      Built for Hedera Hello Future Apex 2026 — AI &amp; Agents Track
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000'
+      : window.location.origin;
+
+    async function loadStats() {
+      try {
+        const [health, stats] = await Promise.all([
+          fetch(`${API_BASE}/health`).then(r => r.json()),
+          fetch(`${API_BASE}/stats`).then(r => r.json())
+        ]);
+
+        // Update network bar
+        const dot = document.querySelector('.status-dot');
+        if (health.status === 'ok') {
+          dot.className = 'status-dot dot-green';
+          document.getElementById('status-indicator').innerHTML =
+            '<span class="status-dot dot-green"></span>Connected';
+        } else {
+          dot.className = 'status-dot dot-yellow';
+          document.getElementById('status-indicator').innerHTML =
+            '<span class="status-dot dot-yellow"></span>Degraded';
+        }
+        document.getElementById('network-info').textContent = `Network: ${health.network}`;
+        document.getElementById('topic-info').textContent =
+          `Memory Topic: ${health.memoryTopicId || 'Not configured'}`;
+        document.getElementById('last-updated').textContent =
+          `Last updated: ${new Date().toLocaleTimeString()}`;
+
+        // Update stats
+        document.getElementById('total-sessions').textContent = stats.totalSessions ?? 0;
+        document.getElementById('total-tasks').textContent = stats.totalTasks ?? 0;
+        document.getElementById('total-decisions').textContent = stats.totalDecisions ?? 0;
+        document.getElementById('total-payments').textContent = 0;
+      } catch (err) {
+        document.querySelector('.status-dot').className = 'status-dot dot-red';
+        document.getElementById('status-indicator').innerHTML =
+          '<span class="status-dot dot-red"></span>Offline';
+      }
+    }
+
+    async function loadMemory() {
+      try {
+        const data = await fetch(`${API_BASE}/memory?limit=10`).then(r => r.json());
+        const network = data.network || 'testnet';
+        const topicId = data.topicId;
+
+        // Render commits
+        const commitsBody = document.getElementById('commits-table');
+        if (!data.recentCommits || data.recentCommits.length === 0) {
+          commitsBody.innerHTML = '<tr><td colspan="5" style="color:#475569">No memory commits yet. Run the agent to populate.</td></tr>';
+        } else {
+          commitsBody.innerHTML = data.recentCommits.map(commit => {
+            const d = commit.data || {};
+            const hash = (d.memoryHash || '').substring(0, 16) + '...';
+            const ts = commit.timestamp ? new Date(commit.timestamp).toLocaleString() : '—';
+            const hashscanUrl = `https://hashscan.io/${network}/topic/${topicId}`;
+            return `<tr>
+              <td><span class="hash">${d.sessionId || 'unknown'}</span></td>
+              <td><span class="hash">${hash || '—'}</span></td>
+              <td>${d.tasksCompleted ?? '—'}</td>
+              <td>${ts}</td>
+              <td><a class="tx-link" href="${hashscanUrl}" target="_blank">HashScan ↗</a></td>
+            </tr>`;
+          }).join('');
+        }
+
+        // Render tasks
+        const tasksBody = document.getElementById('tasks-table');
+        if (!data.recentTasks || data.recentTasks.length === 0) {
+          tasksBody.innerHTML = '<tr><td colspan="4" style="color:#475569">No tasks logged yet.</td></tr>';
+        } else {
+          tasksBody.innerHTML = data.recentTasks.map(task => {
+            const d = task.data || {};
+            const hashscanUrl = `https://hashscan.io/${network}/topic/${topicId}`;
+            return `<tr>
+              <td><span class="hash">${d.taskId || 'unknown'}</span></td>
+              <td><span class="badge badge-success">${d.type || task.type || 'unknown'}</span></td>
+              <td><span class="badge badge-success">logged</span></td>
+              <td><a class="tx-link" href="${hashscanUrl}" target="_blank">HashScan ↗</a></td>
+            </tr>`;
+          }).join('');
+        }
+      } catch (err) {
+        document.getElementById('commits-table').innerHTML =
+          '<tr><td colspan="5" style="color:#ef4444">Failed to load: API offline</td></tr>';
+      }
+    }
+
+    async function submitTask() {
+      const type = document.getElementById('task-type').value;
+      const prompt = document.getElementById('task-prompt').value.trim();
+      if (!prompt) return;
+
+      const btn = document.getElementById('submit-btn');
+      const resultBox = document.getElementById('task-result');
+      btn.disabled = true;
+      btn.textContent = 'Executing...';
+      resultBox.className = 'result-box visible';
+      resultBox.textContent = 'Submitting task to agent...';
+
+      try {
+        const res = await fetch(`${API_BASE}/tasks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type, prompt })
+        });
+        const data = await res.json();
+
+        if (data.status === 'success') {
+          resultBox.innerHTML = `
+            <div style="color:#6ee7b7;margin-bottom:8px">✓ Task completed in ${data.durationMs}ms</div>
+            <div style="color:#94a3b8;margin-bottom:8px">${data.result}</div>
+            <div style="font-size:11px;color:#475569">
+              HCS TX: <span class="hash">${data.hcsTxId || 'pending'}</span>
+              | <a class="tx-link" href="${data.verificationUrl}" target="_blank">Verify on HashScan ↗</a>
+            </div>`;
+          loadMemory(); // Refresh
+        } else {
+          resultBox.innerHTML = `<div style="color:#f87171">✗ Error: ${data.error}</div>`;
+        }
+      } catch (err) {
+        resultBox.innerHTML = '<div style="color:#f87171">✗ API offline</div>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Execute →';
+      }
+    }
+
+    // Allow Enter key in prompt field
+    document.getElementById('task-prompt').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') submitTask();
+    });
+
+    // Initial load + refresh every 30s
+    loadStats();
+    loadMemory();
+    setInterval(() => { loadStats(); loadMemory(); }, 30000);
+  </script>
+</body>
+</html>

@@ -5,7 +5,7 @@
  * More efficient than SDK queries for history retrieval.
  */
 
-const MIRROR_ENDPOINTS = {
+const MIRROR_ENDPOINTS: Record<string, string> = {
   testnet: "https://testnet.mirrornode.hedera.com/api/v1",
   mainnet: "https://mainnet.mirrornode.hedera.com/api/v1",
 };

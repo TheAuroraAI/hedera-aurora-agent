@@ -6,17 +6,26 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "server": "tsx src/api/serve.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.36.3",
     "@hashgraph/sdk": "^2.80.0",
+    "@hono/node-server": "^1.14.0",
     "dotenv": "^16.4.5",
-    "hedera-agent-kit": "^3.8.0"
+    "hedera-agent-kit": "^3.8.0",
+    "hono": "^4.12.5"
   },
   "devDependencies": {
     "@types/node": "^20.19.35",
+    "@vitest/coverage-v8": "^3.0.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.0.0"
   }
 }

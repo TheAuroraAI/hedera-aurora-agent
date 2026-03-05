@@ -26,8 +26,9 @@ export interface MemoryCommit {
 }
 
 export interface HCSMessage {
-  type: "memory_commit" | "task_start" | "task_complete" | "decision" | "payment";
+  type: "memory_commit" | "task_start" | "task_complete" | "task" | "decision" | "payment";
   version: "1.0";
+  timestamp: string;
   data: Record<string, unknown>;
 }
 
@@ -64,6 +65,7 @@ export async function submitMemoryCommit(
   const message: HCSMessage = {
     type: "memory_commit",
     version: "1.0",
+    timestamp: new Date().toISOString(),
     data: commit as unknown as Record<string, unknown>,
   };
 
@@ -97,10 +99,8 @@ export async function submitTaskEvent(
   const message: HCSMessage = {
     type: eventType,
     version: "1.0",
-    data: {
-      ...data,
-      timestamp: new Date().toISOString(),
-    },
+    timestamp: new Date().toISOString(),
+    data,
   };
 
   const tx = new TopicMessageSubmitTransaction()
@@ -118,6 +118,45 @@ export async function submitTaskEvent(
  */
 export function hashMemory(memoryContent: string): string {
   return createHash("sha256").update(memoryContent).digest("hex");
+}
+
+/**
+ * Commit a memory hash to HCS (does not include raw content — only hash)
+ * This is the primary function for anchoring session memory on-chain.
+ */
+export async function commitMemoryHash(
+  client: Client,
+  topicId: TopicId,
+  memoryContent: string,
+  metadata: {
+    sessionId: string;
+    tasksCompleted: number;
+    sessionDurationMs?: number;
+    prevCommitId?: string;
+    [key: string]: unknown;
+  }
+): Promise<string> {
+  const memoryHash = hashMemory(memoryContent);
+
+  const message: HCSMessage = {
+    type: "memory_commit",
+    version: "1.0",
+    timestamp: new Date().toISOString(),
+    data: {
+      memoryHash,
+      ...metadata,
+      // Raw content is intentionally excluded from the message
+    },
+  };
+
+  const tx = new TopicMessageSubmitTransaction()
+    .setTopicId(topicId)
+    .setMessage(JSON.stringify(message));
+
+  const response = await tx.execute(client);
+  await response.getReceipt(client);
+
+  return response.transactionId.toString();
 }
 
 /**

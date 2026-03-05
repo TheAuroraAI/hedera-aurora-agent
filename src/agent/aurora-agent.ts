@@ -25,7 +25,7 @@ const anthropic = new Anthropic({
 
 export interface AgentTask {
   id: string;
-  type: "research" | "code_review" | "analysis" | "writing";
+  type: "research" | "code_review" | "analysis" | "writing" | "summary";
   prompt: string;
   payer?: string; // Hedera account ID of task requester
   paymentTxId?: string; // HBAR payment transaction ID

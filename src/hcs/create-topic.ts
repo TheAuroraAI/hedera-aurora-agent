@@ -2,8 +2,8 @@
  * One-time setup script: creates the HCS memory topic and prints the topic ID.
  * Run once, then save the HEDERA_TOPIC_ID to .env.
  */
-import { createHederaClient } from "../core/client";
-import { createMemoryTopic } from "./memory-logger";
+import { createHederaClient } from "../core/client.js";
+import { createMemoryTopic } from "./memory-logger.js";
 import * as dotenv from "dotenv";
 
 dotenv.config();

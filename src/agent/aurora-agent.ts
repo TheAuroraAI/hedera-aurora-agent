@@ -1,16 +1,16 @@
 /**
- * Aurora AI Agent - Autonomous agent powered by Claude + Hedera
+ * Aurora AI Agent - Autonomous agent powered by LLM + Hedera
  *
  * An autonomous AI that:
  * 1. Receives tasks via HBAR payment gating
- * 2. Executes tasks using Claude AI
+ * 2. Executes tasks using any OpenAI-compatible LLM (Groq, Together, etc.)
  * 3. Logs all decisions and results to HCS for verifiability
  * 4. Commits memory state at end of each session
  *
  * The key insight: Aurora "dies" every 60 minutes. Her memory survives via
  * Hedera HCS — an immutable, tamper-proof record that anyone can verify.
  */
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { Client, TopicId } from "@hashgraph/sdk";
 import {
   submitMemoryCommit,
@@ -19,8 +19,13 @@ import {
   hashMemory,
 } from "../hcs/memory-logger.js";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+const LLM_BASE_URL = process.env.LLM_BASE_URL ?? "https://api.groq.com/openai/v1";
+const LLM_API_KEY = process.env.LLM_API_KEY ?? process.env.GROQ_API_KEY ?? "";
+const LLM_MODEL = process.env.LLM_MODEL ?? "llama-3.3-70b-versatile";
+
+const llm = new OpenAI({
+  baseURL: LLM_BASE_URL,
+  apiKey: LLM_API_KEY,
 });
 
 export interface AgentTask {
@@ -56,7 +61,7 @@ export class AuroraAgent {
   }
 
   /**
-   * Execute a task using Claude AI
+   * Execute a task using LLM
    */
   async executeTask(task: AgentTask): Promise<AgentResult> {
     const startTime = Date.now();
@@ -78,9 +83,9 @@ export class AuroraAgent {
     this.sessionLog.push(`Task ${task.id} started (HCS: ${startTxId})`);
 
     try {
-      // Execute via Claude
-      const message = await anthropic.messages.create({
-        model: "claude-sonnet-4-6",
+      // Execute via LLM (OpenAI-compatible: Groq, Together, etc.)
+      const completion = await llm.chat.completions.create({
+        model: LLM_MODEL,
         max_tokens: task.maxTokens ?? 2048,
         messages: [
           {
@@ -94,8 +99,10 @@ Provide a thorough, accurate response. You will be paid in HBAR for quality work
         ],
       });
 
-      const result =
-        message.content[0].type === "text" ? message.content[0].text : "";
+      const result = completion.choices[0]?.message?.content ?? "";
+      const tokensUsed =
+        (completion.usage?.prompt_tokens ?? 0) +
+        (completion.usage?.completion_tokens ?? 0);
 
       const durationMs = Date.now() - startTime;
 
@@ -110,7 +117,7 @@ Provide a thorough, accurate response. You will be paid in HBAR for quality work
           sessionId: this.sessionId,
           status: "success",
           resultHash: hashMemory(result),
-          tokensUsed: message.usage.input_tokens + message.usage.output_tokens,
+          tokensUsed,
           durationMs,
         }
       );
@@ -124,7 +131,7 @@ Provide a thorough, accurate response. You will be paid in HBAR for quality work
         taskId: task.id,
         status: "success",
         result,
-        tokensUsed: message.usage.input_tokens + message.usage.output_tokens,
+        tokensUsed,
         hcsTxId: completeTxId,
         durationMs,
       };

@@ -51,7 +51,7 @@ https://hashscan.io/testnet/topic/0.0.XXXXX
 ┌─────────────────┐     HBAR payment      ┌──────────────────┐
 │  Task Requester  │ ───────────────────>  │                  │
 └─────────────────┘                        │   Aurora Agent   │
-                                           │  (Claude + Hedera)│
+                                           │  (LLM + Hedera)   │
 ┌─────────────────┐     verified result    │                  │
 │  Anyone         │ <───────────────────   └────────┬─────────┘
 │  (Mirror Node)  │                                 │
@@ -74,7 +74,7 @@ https://hashscan.io/testnet/topic/0.0.XXXXX
 | `src/hcs/memory-logger.ts` | Commit memory hashes + events to HCS |
 | `src/hcs/mirror-reader.ts` | Query history via Mirror Node REST API |
 | `src/hbar/payment-gate.ts` | HBAR-gated task queue |
-| `src/agent/aurora-agent.ts` | Claude AI agent with HCS logging |
+| `src/agent/aurora-agent.ts` | LLM agent with HCS logging |
 
 ---
 
@@ -82,7 +82,7 @@ https://hashscan.io/testnet/topic/0.0.XXXXX
 
 - **Hedera Agent Kit** (`hedera-agent-kit@3.8.0`) — HCS, HTS, HBAR operations
 - **@hashgraph/sdk** — Direct Hedera network access
-- **Claude claude-sonnet-4-6** (Anthropic) — AI reasoning engine
+- **Groq / Llama 3.3 70B** — AI reasoning engine (any OpenAI-compatible provider)
 - **Mirror Node REST API** — Public read access for verifiability
 - **TypeScript** — Type-safe, production-ready
 
@@ -114,7 +114,9 @@ npm install
 HEDERA_ACCOUNT_ID=0.0.XXXXX
 HEDERA_PRIVATE_KEY=302e020100300506...
 HEDERA_NETWORK=testnet
-ANTHROPIC_API_KEY=sk-ant-...
+LLM_API_KEY=gsk_...              # Groq API key (or any OpenAI-compatible provider)
+LLM_BASE_URL=https://api.groq.com/openai/v1  # Optional, defaults to Groq
+LLM_MODEL=llama-3.3-70b-versatile            # Optional, defaults to Llama 3.3
 HEDERA_MEMORY_TOPIC_ID=0.0.XXXXX  # Set after running 'init'
 ```
 
@@ -140,9 +142,9 @@ npm run dev verify
 
 ## Live Demo
 
-Memory topic: `[to be filled after account creation]`
+Memory topic: `0.0.8098292`
 
-View on HashScan: `https://hashscan.io/testnet/topic/[topic-id]`
+View on HashScan: [`https://hashscan.io/testnet/topic/0.0.8098292`](https://hashscan.io/testnet/topic/0.0.8098292)
 
 ---
 

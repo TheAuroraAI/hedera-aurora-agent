@@ -86,7 +86,7 @@ export async function registerOnHCS10(
       name: agentMeta.name,
       description: agentMeta.description,
       capabilities: agentMeta.capabilities,
-      model: "claude-sonnet-4-6",
+      model: process.env.LLM_MODEL ?? "llama-3.3-70b-versatile",
       version: "1.0.0",
     },
     timestamp: new Date().toISOString(),

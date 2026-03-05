@@ -56,14 +56,16 @@ vi.mock("@hashgraph/sdk", () => ({
   },
 }));
 
-// Mock Anthropic SDK to avoid real API calls
-vi.mock("@anthropic-ai/sdk", () => ({
+// Mock OpenAI SDK (used for Groq/Together/any OpenAI-compatible LLM)
+vi.mock("openai", () => ({
   default: vi.fn().mockImplementation(() => ({
-    messages: {
-      create: vi.fn().mockResolvedValue({
-        content: [{ type: "text", text: "Mock AI response for testing purposes." }],
-        usage: { input_tokens: 100, output_tokens: 50 },
-      }),
+    chat: {
+      completions: {
+        create: vi.fn().mockResolvedValue({
+          choices: [{ message: { content: "Mock AI response for testing purposes." } }],
+          usage: { prompt_tokens: 100, completion_tokens: 50 },
+        }),
+      },
     },
   })),
 }));

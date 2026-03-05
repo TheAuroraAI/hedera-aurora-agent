@@ -31,6 +31,7 @@ interface TaskResponse {
   durationMs: number;
   verificationUrl?: string;
   error?: string;
+  demoMode?: boolean;
 }
 
 interface HealthResponse {
@@ -39,6 +40,8 @@ interface HealthResponse {
   memoryTopicId: string | null;
   sessionId: string;
   timestamp: string;
+  demoMode: boolean;
+  llmModel: string;
 }
 
 // Lazy-initialized agent (avoids crash if HEDERA_ACCOUNT_ID not set yet)
@@ -66,6 +69,7 @@ app.use("*", cors());
 
 // Health check — always works even without testnet account
 app.get("/health", (c) => {
+  const hasLlmKey = !!(process.env.LLM_API_KEY ?? process.env.GROQ_API_KEY);
   const response: HealthResponse = {
     status: "ok",
     network: process.env.HEDERA_NETWORK ?? "testnet",
@@ -74,6 +78,8 @@ app.get("/health", (c) => {
       ? `session-${Date.now()}`
       : "unconfigured",
     timestamp: new Date().toISOString(),
+    demoMode: !hasLlmKey,
+    llmModel: process.env.LLM_MODEL ?? "llama-3.3-70b-versatile",
   };
 
   if (!process.env.HEDERA_ACCOUNT_ID || !process.env.HEDERA_MEMORY_TOPIC_ID) {
@@ -138,6 +144,7 @@ app.post("/tasks", async (c) => {
     const network = process.env.HEDERA_NETWORK ?? "testnet";
     const topicIdStr = topicId.toString();
 
+    const hasLlmKey = !!(process.env.LLM_API_KEY ?? process.env.GROQ_API_KEY);
     const response: TaskResponse = {
       taskId,
       status: result.status,
@@ -146,6 +153,7 @@ app.post("/tasks", async (c) => {
       durationMs: Date.now() - start,
       verificationUrl: `https://hashscan.io/${network}/topic/${topicIdStr}`,
       error: result.error,
+      demoMode: !hasLlmKey,
     };
 
     return c.json(response, result.status === "success" ? 200 : 500);

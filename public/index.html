@@ -156,6 +156,10 @@
     <div class="tagline">Aurora AI Agent — Verifiable Memory Protocol on Hedera Consensus Service</div>
   </header>
 
+  <div id="demo-banner" style="display:none;background:#78350f;border-bottom:1px solid #f59e0b30;padding:8px 32px;font-size:12px;color:#fcd34d;text-align:center;">
+    ⚡ Demo Mode — HCS audit trail is live and real. Add <code>GROQ_API_KEY</code> env var to enable live AI execution.
+  </div>
+
   <div class="network-bar">
     <span id="status-indicator">
       <span class="status-dot dot-yellow"></span>Connecting...
@@ -281,6 +285,11 @@
           `Memory Topic: ${health.memoryTopicId || 'Not configured'}`;
         document.getElementById('last-updated').textContent =
           `Last updated: ${new Date().toLocaleTimeString()}`;
+
+        // Show demo mode banner
+        if (health.demoMode) {
+          document.getElementById('demo-banner').style.display = 'block';
+        }
 
         // Update stats
         document.getElementById('total-sessions').textContent = stats.totalSessions ?? 0;

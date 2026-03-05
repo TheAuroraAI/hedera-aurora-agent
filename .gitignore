@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+.env.local
+*.env
+/keys/
+.hedera-keys/
+*.key
+*.pem
+bun.lockb

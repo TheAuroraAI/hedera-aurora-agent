@@ -1,0 +1,22 @@
+{
+  "name": "hedera-aurora-agent",
+  "version": "1.0.0",
+  "description": "Persistent - Verifiable AI Agent Memory Protocol on Hedera",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.36.3",
+    "@hashgraph/sdk": "^2.80.0",
+    "dotenv": "^16.4.5",
+    "hedera-agent-kit": "^3.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.35",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

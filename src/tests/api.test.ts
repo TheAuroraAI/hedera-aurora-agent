@@ -6,13 +6,6 @@
  */
 import { describe, it, expect, vi } from "vitest";
 
-// Must be set before any module imports
-vi.stubEnv("HEDERA_ACCOUNT_ID", "0.0.1234");
-vi.stubEnv("HEDERA_PRIVATE_KEY", "302e020100300506032b657004220420" + "a".repeat(64));
-vi.stubEnv("HEDERA_NETWORK", "testnet");
-vi.stubEnv("HEDERA_MEMORY_TOPIC_ID", "0.0.5000");
-vi.stubEnv("ANTHROPIC_API_KEY", "test-key-not-used");
-
 // Mock Hedera SDK with inline factories
 vi.mock("@hashgraph/sdk", () => ({
   TopicCreateTransaction: vi.fn().mockImplementation(() => ({

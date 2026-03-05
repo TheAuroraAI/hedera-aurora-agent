@@ -65,10 +65,6 @@ vi.mock("@hashgraph/sdk", () => {
   };
 });
 
-vi.stubEnv("HEDERA_ACCOUNT_ID", "0.0.1234");
-vi.stubEnv("HEDERA_PRIVATE_KEY", "302e020100300506032b657004220420" + "a".repeat(64));
-vi.stubEnv("HEDERA_NETWORK", "testnet");
-
 import {
   createMemoryTopic,
   submitTaskEvent,

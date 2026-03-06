@@ -142,6 +142,8 @@ npm run dev verify
 
 ## Live Demo
 
+**Dashboard**: [dashboard-fawn-sigma.vercel.app](https://dashboard-fawn-sigma.vercel.app) — reads HCS data directly from Hedera Mirror Node, no backend required.
+
 Memory topic: `0.0.8098292`
 
 View on HashScan: [`https://hashscan.io/testnet/topic/0.0.8098292`](https://hashscan.io/testnet/topic/0.0.8098292)
